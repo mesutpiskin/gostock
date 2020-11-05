@@ -5,9 +5,9 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import Deposits from '../components/Deposits';
+import FundProfile from '../components/FundProfile';
 import Title from '../components/Title';
-import Dividers from '../components/Dividers';
+import Dividers from '../components/FundPrice';
 
 
 const drawerWidth = 0;
@@ -118,7 +118,7 @@ export default function FundPage(props) {
             {/* Recent Deposits */}
             <Grid item xs={12} md={6} lg={8}>
               <Paper className={fixedHeightPaper}>
-                <Deposits />
+                <FundProfile />
               </Paper>
             </Grid>
 
