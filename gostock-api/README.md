@@ -7,3 +7,14 @@ GoStock, Free Stock Market APIs to get stock and fund market data. RESTful API w
 - Google Finance Stock Data (Global)
 - Yahoo Finance Stock Data (Global)
 - Fund Data (Turkey, USA)
+
+## Installation
+
+### Enviroments
+
+Mongo Database connection
+```
+export MONGO_USER=<USER>
+export MONGO_PASSWORD=<PASSWORD>
+export MONGO_HOST=<HOST>
+```

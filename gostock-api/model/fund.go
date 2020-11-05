@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 // Fund struct (Model)
 type Fund struct {
 	Name 		string `json:"name"`
@@ -11,5 +13,11 @@ type Fund struct {
 	Category    string `json:"category"`
 	Investors   string `json:"investors"`
 	MarketShare string `json:"marketshare"`
-	FromCache   string `json:"fromcache"`
+	FromCache   bool `json:"fromcache"`
+	DateTime    time.Time `json:"datetime"`
+}
+
+// FundCode struct (Model)
+type FundCode struct {
+	Code        string `json:"code"`
 }

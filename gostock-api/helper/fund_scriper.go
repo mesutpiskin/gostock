@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"time"
+
 	"mesutpiskin.com/gostock/model"
 
 	"github.com/gocolly/colly"
@@ -33,7 +35,8 @@ func ScrapeFundByCode(code string) model.Fund {
 			Name: name,
 			Investors: investors,
 			MarketShare: marketShare,
-			FromCache: "false"}
+			FromCache: false,
+			DateTime: time.Now()}
 	})
 	collector.Visit(TefasUrl + code)
 

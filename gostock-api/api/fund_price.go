@@ -28,7 +28,7 @@ func GetFund (w http.ResponseWriter, r *http.Request, cache *bigcache.BigCache) 
 		if err := helper.DecodeFromBase64(&jsonFund, string(cacheData)); err != nil {
 			panic(err)
 		}
-		jsonFund.FromCache = "true"
+		jsonFund.FromCache = true
 		json.NewEncoder(w).Encode(jsonFund)
 		return		
 	}
@@ -46,5 +46,23 @@ func GetFund (w http.ResponseWriter, r *http.Request, cache *bigcache.BigCache) 
 	}
 
 	json.NewEncoder(w).Encode(fundData)
+}
+
+// GetFunds get multiple fund
+func GetFunds (w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	
+	var fundcodes []model.FundCode
+	err := json.NewDecoder(r.Body).Decode(&fundcodes)
+	if err != nil {
+		panic(err)
+	}
+	var fundModels []model.Fund
+	for _, element := range fundcodes{
+        data := helper.ScrapeFundByCode(strings.ToUpper(element.Code))  	    
+		fundModels = append(fundModels, data)
+	}   
+	
+	json.NewEncoder(w).Encode(fundModels)
 }
 
