@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"time"
@@ -19,7 +18,6 @@ const port string = "5000"
 func main() {
 
 	client := nosql.ConnectToMongoDB()
-	client.Ping(context.TODO(), nil)
 
 	// Init router
 	router := mux.NewRouter()

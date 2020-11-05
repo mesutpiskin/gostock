@@ -5,9 +5,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import BeachAccessIcon from '@material-ui/icons/BeachAccess';
 import CallMissedOutgoingIcon from '@material-ui/icons/CallMissedOutgoing';
 import Divider from '@material-ui/core/Divider';
 import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
@@ -20,9 +18,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Dividers() {
+export default function Dividers(props) {
   const classes = useStyles();
-
+  console.log(props.fundModel.name);
   return (
     <List className={classes.root}>
       <ListItem>
@@ -31,7 +29,7 @@ export default function Dividers() {
             <LocalOfferIcon color="primary" />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Son Fiyat (TL)" secondary="13,142674" />
+        <ListItemText primary="Güncel Fiyat" secondary={"₺" + props.fundModel.price} />
       </ListItem>
       <Divider variant="inset" component="li" />
       <ListItem>
@@ -40,16 +38,16 @@ export default function Dividers() {
             <CallMissedOutgoingIcon color="primary" />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Günlük Getiri (%)" secondary="13,142674" />
+        <ListItemText primary="Günlük Getiri" secondary={props.fundModel.dailyreturn} />
       </ListItem>
       <Divider variant="inset" component="li" />
       <ListItem>
         <ListItemAvatar>
           <Avatar>
-            <MoneyIcon color="primary"/>
+            <MoneyIcon color="primary" />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Pay (Adet)" secondary="13,142674" />
+        <ListItemText primary="Toplam Pay" secondary={props.fundModel.pcs} />
       </ListItem>
       <Divider variant="inset" component="li" />
       <ListItem>
@@ -58,7 +56,7 @@ export default function Dividers() {
             <PeopleAltIcon color="primary" />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Fon Toplam Değer (TL)" secondary="13,142674" />
+        <ListItemText primary="Fon Büyüklüğü" secondary={"₺" + props.fundModel.totalvalue} />
       </ListItem>
     </List>
   );
