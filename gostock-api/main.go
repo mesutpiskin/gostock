@@ -17,7 +17,7 @@ const port string = "5000"
 // Main function
 func main() {
 
-	client := nosql.ConnectToMongoDB()
+	nosql.ConnectToMongoDB()
 
 	// Init router
 	router := mux.NewRouter()
