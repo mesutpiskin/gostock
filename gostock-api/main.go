@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -16,9 +17,7 @@ const port string = "5000"
 
 // Main function
 func main() {
-
-	nosql.ConnectToMongoDB()
-
+	go nosql.ConnectToMongoDB()
 	// Init router
 	router := mux.NewRouter()
 	// Init memory cache
@@ -28,10 +27,13 @@ func main() {
 	}
 	// Route handles & endpoints
 
-	router.HandleFunc("/funds/{name}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/fund/{name}", func(w http.ResponseWriter, r *http.Request) {
 		api.GetFund(w, r, cache)
 	}).Methods("GET")
-	router.HandleFunc("/fund", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/profile/{name}", func(w http.ResponseWriter, r *http.Request) {
+		api.GetFundProfile(w, r, cache)
+	}).Methods("GET")
+	router.HandleFunc("/funds", func(w http.ResponseWriter, r *http.Request) {
 		api.GetFunds(w, r)
 	}).Methods("POST")
 	router.HandleFunc("/health", api.Healthy).Methods("GET")
@@ -44,7 +46,7 @@ func main() {
 	handler := c.Handler(router)
 
 	// Start server
-	print("Server starting... \n http://localhost:" + port)
+	fmt.Println("Server starting... \n http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
 
 }
