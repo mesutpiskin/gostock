@@ -21,7 +21,7 @@ func main() {
 	// Init router
 	router := mux.NewRouter()
 	// Init memory cache
-	cache, initErr := bigcache.NewBigCache(bigcache.DefaultConfig(10 * time.Minute))
+	cache, initErr := bigcache.NewBigCache(bigcache.DefaultConfig(60 * time.Minute))
 	if initErr != nil {
 		log.Fatal(initErr)
 	}
@@ -36,6 +36,12 @@ func main() {
 	router.HandleFunc("/funds", func(w http.ResponseWriter, r *http.Request) {
 		api.GetFunds(w, r)
 	}).Methods("POST")
+	router.HandleFunc("/allfund", func(w http.ResponseWriter, r *http.Request) {
+		api.GetAllFundsFromDb(w, r, cache)
+	}).Methods("GET")
+	router.HandleFunc("/allfundreport/{name}", func(w http.ResponseWriter, r *http.Request) {
+		api.GetAllFundsReportFromDb(w, r, cache)
+	}).Methods("GET")
 	router.HandleFunc("/health", api.Healthy).Methods("GET")
 
 	c := cors.New(cors.Options{
