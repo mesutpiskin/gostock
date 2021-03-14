@@ -1,6 +1,6 @@
 # gostock - Stock and Fund Market Tracker 
 
-GoStock, Free Stock Market APIs to get stock and fund market data. A web responsive stock and fund application for users who want to search for stock quote(stock and fund ticker, current price, change), sector performance and the latest news. 
+GoStock, Free Fund Market APIs to get fund market data. A fund API's for users who want to search for fund quote (fund ticker, current price, change), sector performance and the latest news. 
 
 Gostock Global Fund Flows provide industry leading sales and redemptions content and analysis, providing insight into current and historical market sentiment.
 
@@ -28,3 +28,7 @@ Gostock applies proprietary methodologies to create relevant, market-driven Gost
 ## Build
 
 ## Publish
+
+
+---
+First of all, it is a golang hello world app for me.
