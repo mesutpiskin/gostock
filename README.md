@@ -8,17 +8,18 @@ Gostock applies proprietary methodologies to create relevant, market-driven Gost
 
 ## Features
 
-- Fund Profiles (Turkey, USA)
-- Fund Price (10 Years)
+- Fund Profiles: Market share, volume, investors, income, etc.
+- Daily Fund Price
 - Fund History
-- Historical Market Volumes (10 Years)
+- Historical Market Volumes
+- Fund and company news (English, Turkish)
 
 
 ## Configuration
 
 ### Database
 
-### Data Source
+### Localization
 
 ### Caching
 
