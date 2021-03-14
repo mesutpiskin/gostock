@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"mesutpiskin.com/gostock/model"
@@ -8,12 +10,10 @@ import (
 	"github.com/gocolly/colly"
 )
 
-const TefasUrl = "https://www.tefas.gov.tr/FonAnaliz.aspx?FonKod="
-
 //ScrapeFundByCode get fund price model by fund code
-func ScrapeFundByCode(code string) model.Fund {
+func ScrapeFundByCode(code string, url string) model.BasicFund {
 	collector := colly.NewCollector()
-	var fundPrice model.Fund
+	var fundPrice model.BasicFund
 	collector.OnHTML("#MainContent_PanelInfo", func(content *colly.HTMLElement) {
 		mainIndicators := content
 		name := mainIndicators.ChildText("#MainContent_FormViewMainIndicators_LabelFund")
@@ -29,30 +29,29 @@ func ScrapeFundByCode(code string) model.Fund {
 		last6MounthsPrice := mainIndicators.ChildText("div.price-indicators>ul > li:nth-child(3) > span")
 		last12MounthsPrice := mainIndicators.ChildText("div.price-indicators>ul > li:nth-child(4) > span")
 
-		fundPrice = model.Fund{
-			Price:              lastPrice,
-			DailyReturn:        dailyReturn,
-			Pcs:                pcs,
-			TotalValue:         totalValue,
+		fundPrice = model.BasicFund{
+			Price:              textToFloat(lastPrice),
+			DailyReturn:        textToFloat(dailyReturn),
+			Pcs:                textToFloat(pcs),
+			TotalValue:         textToFloat(totalValue),
 			Category:           category,
 			Code:               code,
 			Name:               name,
-			Investors:          investors,
-			MarketShare:        marketShare,
-			Last1MounthsPrice:  last1MounthsPrice,
-			Last3MounthsPrice:  last3MounthsPrice,
-			Last6MounthsPrice:  last6MounthsPrice,
-			Last12MounthsPrice: last12MounthsPrice,
-			FromCache:          false,
-			DateTime:           time.Now().Format("02-01-2006")}
+			Investors:          textToFloat(investors),
+			MarketShare:        textToFloat(marketShare),
+			Last1MounthsPrice:  textToFloat(last1MounthsPrice),
+			Last3MounthsPrice:  textToFloat(last3MounthsPrice),
+			Last6MounthsPrice:  textToFloat(last6MounthsPrice),
+			Last12MounthsPrice: textToFloat(last12MounthsPrice),
+			DateTime:           time.Now()}
 	})
-	collector.Visit(TefasUrl + code)
+	collector.Visit(url + code)
 
 	return fundPrice
 }
 
 //ScrapeFundProfileByCode get fund prfile model by fund code
-func ScrapeFundProfileByCode(fundCode string) model.FundProfile {
+func ScrapeFundProfileByCode(fundCode string, url string) model.FundProfile {
 	collector := colly.NewCollector()
 	var fundProfile model.FundProfile
 	collector.OnHTML("#MainContent_DetailsViewFund", func(content *colly.HTMLElement) {
@@ -77,19 +76,38 @@ func ScrapeFundProfileByCode(fundCode string) model.FundProfile {
 			Isin:                         isin,
 			StartingTime:                 startingtime,
 			EndTime:                      endtime,
-			BuyingValueDate:              buyingbaluedate,
-			SaleValueDate:                salevaluedate,
-			MinPurchaseTransactionAmount: minpurchasetransactionamount,
-			MinSalesTransactionAmount:    minsalestransactionamount,
-			MaxPurchaseTransactionAmount: maxpurchasetransactionamount,
-			MaxSalesTransactionAmount:    maxsalestransactionamount,
+			BuyingValueDate:              textToFloat(buyingbaluedate),
+			SaleValueDate:                textToFloat(salevaluedate),
+			MinPurchaseTransactionAmount: textToFloat(minpurchasetransactionamount),
+			MinSalesTransactionAmount:    textToFloat(minsalestransactionamount),
+			MaxPurchaseTransactionAmount: textToFloat(maxpurchasetransactionamount),
+			MaxSalesTransactionAmount:    textToFloat(maxsalestransactionamount),
 			Status:                       status,
-			EntryCommission:              entrycommission,
-			ExitCommission:               exitcommission,
+			EntryCommission:              textToFloat(entrycommission),
+			ExitCommission:               textToFloat(exitcommission),
 			KapUrl:                       kapURL,
 			FromCache:                    false,
-			DateTime:                     time.Now().Format("02-01-2006")}
+			DateTime:                     time.Now()}
 	})
-	collector.Visit(TefasUrl + fundCode)
+	collector.Visit(url + fundCode)
 	return fundProfile
+}
+
+func textToFloat(text string) float64 {
+	if text == "" {
+		return 0
+	}
+	number := strings.Replace(text, "%", "", -1)
+	number = strings.Replace(number, ".", "", -1)
+	number = strings.Replace(number, ",", ".", -1)
+	if number == "" {
+		return 0
+	}
+	price, err := strconv.ParseFloat(number, 64)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return price
 }

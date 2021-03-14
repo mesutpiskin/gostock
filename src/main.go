@@ -26,22 +26,48 @@ func main() {
 		log.Fatal(initErr)
 	}
 	// Route handles & endpoints
-
-	router.HandleFunc("/fund/{name}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/fund/tefas/{name}", func(w http.ResponseWriter, r *http.Request) {
 		api.GetFund(w, r, cache)
 	}).Methods("GET")
-	router.HandleFunc("/profile/{name}", func(w http.ResponseWriter, r *http.Request) {
+
+	router.HandleFunc("/fund/tefas/profile/{name}", func(w http.ResponseWriter, r *http.Request) {
 		api.GetFundProfile(w, r, cache)
 	}).Methods("GET")
-	router.HandleFunc("/funds", func(w http.ResponseWriter, r *http.Request) {
+
+	router.HandleFunc("/fund/tefas/multiple", func(w http.ResponseWriter, r *http.Request) {
 		api.GetFunds(w, r)
 	}).Methods("POST")
-	router.HandleFunc("/allfund", func(w http.ResponseWriter, r *http.Request) {
+
+	router.HandleFunc("/fund/allfund", func(w http.ResponseWriter, r *http.Request) {
 		api.GetAllFundsFromDb(w, r, cache)
 	}).Methods("GET")
-	router.HandleFunc("/allfundreport/{name}", func(w http.ResponseWriter, r *http.Request) {
+
+	router.HandleFunc("/fund/{code}", func(w http.ResponseWriter, r *http.Request) {
+		api.GetFundFromDb(w, r, cache)
+	}).Methods("GET")
+
+	router.HandleFunc("/fund/profile/{code}", func(w http.ResponseWriter, r *http.Request) {
+		api.GetFundProfileFromDb(w, r, cache)
+	}).Methods("GET")
+
+	router.HandleFunc("/fund/history/{name}", func(w http.ResponseWriter, r *http.Request) {
 		api.GetAllFundsReportFromDb(w, r, cache)
 	}).Methods("GET")
+
+	// Categories
+	router.HandleFunc("/fund/categories/last6mounthvalues", func(w http.ResponseWriter, r *http.Request) {
+		api.GetFundsCategoryValues(w, r, cache)
+	}).Methods("GET")
+
+	//scheduled end points
+	router.HandleFunc("/job/tefas/price", func(w http.ResponseWriter, r *http.Request) {
+		api.ScrapeAndPersistTodayFundPriceByCode(w, r)
+	}).Methods("POST")
+
+	router.HandleFunc("/job/tefas/profile", func(w http.ResponseWriter, r *http.Request) {
+		api.ScrapeAndPersistTodayFundProfileByCode(w, r)
+	}).Methods("POST")
+
 	router.HandleFunc("/health", api.Healthy).Methods("GET")
 
 	c := cors.New(cors.Options{

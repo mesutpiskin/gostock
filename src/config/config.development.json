@@ -1,5 +1,8 @@
 {
   "mongodb": {
-
+    
+  },
+  "screaperurls": {
+    "tefas": "https://www.tefas.gov.tr/FonAnaliz.aspx?FonKod="
   }
 }

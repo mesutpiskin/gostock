@@ -39,11 +39,13 @@ func GetFund(w http.ResponseWriter, r *http.Request, cache *bigcache.BigCache) {
 	}
 
 	//Getting from website
-	fundData := helper.ScrapeFundByCode(fundCode)
-	fundProfiledata := helper.ScrapeFundProfileByCode(fundCode)
-	fundData.FundProfile = fundProfiledata
+	var configurationModel model.ConfigurationModel
+	configurationModel = helper.GetConfiguration()
+	fundPrice := helper.ScrapeFundByCode(fundCode, configurationModel.ScreaperUrls.Tefas)
+	fundProfiledata := helper.ScrapeFundProfileByCode(fundCode, configurationModel.ScreaperUrls.Tefas)
+	fundResult := model.Fund{BasicFund: fundPrice, FundProfile: fundProfiledata}
 
-	enc, err := helper.EncodeToBase64(fundData)
+	enc, err := helper.EncodeToBase64(fundResult)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +54,7 @@ func GetFund(w http.ResponseWriter, r *http.Request, cache *bigcache.BigCache) {
 		panic(setErr)
 	}
 
-	json.NewEncoder(w).Encode(fundData)
+	json.NewEncoder(w).Encode(fundResult)
 }
 
 //GetFundProfile get fund profile data
@@ -73,9 +75,10 @@ func GetFundProfile(w http.ResponseWriter, r *http.Request, cache *bigcache.BigC
 		json.NewEncoder(w).Encode(jsonFund)
 		return
 	}
-
+	var configurationModel model.ConfigurationModel
+	configurationModel = helper.GetConfiguration()
 	//Getting from website
-	fundData := helper.ScrapeFundProfileByCode(fundCode)
+	fundData := helper.ScrapeFundProfileByCode(fundCode, configurationModel.ScreaperUrls.Tefas)
 
 	enc, err := helper.EncodeToBase64(fundData)
 	if err != nil {
@@ -100,14 +103,13 @@ func GetFunds(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	var fundModels []model.Fund
-
+	var configurationModel model.ConfigurationModel
+	configurationModel = helper.GetConfiguration()
 	for _, element := range fundcodes {
-		fundData := helper.ScrapeFundByCode(strings.ToUpper(element.Code))
-		fundProfiledata := helper.ScrapeFundProfileByCode(strings.ToUpper(element.Code))
-		fundData.FundProfile = fundProfiledata
-		fundModels = append(fundModels, fundData)
-
-		go saveFundToDB(fundData)
+		fundPrice := helper.ScrapeFundByCode(strings.ToUpper(element.Code), configurationModel.ScreaperUrls.Tefas)
+		fundProfiledata := helper.ScrapeFundProfileByCode(strings.ToUpper(element.Code), configurationModel.ScreaperUrls.Tefas)
+		fundResult := model.Fund{BasicFund: fundPrice, FundProfile: fundProfiledata}
+		fundModels = append(fundModels, fundResult)
 	}
 
 	json.NewEncoder(w).Encode(fundModels)
@@ -126,7 +128,7 @@ func GetAllFundsFromDb(w http.ResponseWriter, r *http.Request, cache *bigcache.B
 		json.NewEncoder(w).Encode(funds)
 		return
 	}
-	collection := nosql.MongoClient.Database("db0").Collection("funds")
+	collection := nosql.MongoClient.Database("db0").Collection("price")
 	cursor, err := collection.Find(context.TODO(), bson.M{"datetime": time.Now().Format("02-01-2006")})
 	if err != nil {
 		log.Fatal(err)
@@ -203,12 +205,66 @@ func GetAllFundsReportFromDb(w http.ResponseWriter, r *http.Request, cache *bigc
 	json.NewEncoder(w).Encode(result)
 }
 
-func saveFundToDB(fundModel model.Fund) {
-	collection := nosql.MongoClient.Database("db0").Collection("funds")
-	insertResult, err := collection.InsertOne(context.TODO(), fundModel)
-	if err != nil {
-		log.Fatal(err)
+//GetFundProfileFromDb profile getter from mongo
+func GetFundProfileFromDb(w http.ResponseWriter, r *http.Request, cache *bigcache.BigCache) {
+	params := mux.Vars(r) // Gets params
+	fundCode := strings.ToUpper(params["code"])
+	var fundProfile bson.M
+	var key string = "FUND_PROFILE_" + fundCode
+
+	cacheData, cacheErr := cache.Get(key)
+	if cacheErr == nil {
+		if err := helper.DecodeFromBase64(&fundProfile, string(cacheData)); err != nil {
+			panic(err)
+		}
+	}
+	// Get data from db
+	collection := nosql.MongoClient.Database("db0").Collection("profile")
+	if err := collection.FindOne(context.TODO(), bson.M{"code": fundCode}).Decode(&fundProfile); err != nil {
+		panic(err)
 	}
 
-	log.Println("Inserted a single document: ", insertResult.InsertedID)
+	// Encode for caching
+	enc, err := helper.EncodeToBase64(fundProfile)
+	if err != nil {
+		panic(err)
+	}
+	setErr := cache.Set(key, []byte(enc))
+	if setErr != nil {
+		panic(setErr)
+	}
+
+	json.NewEncoder(w).Encode(fundProfile)
+}
+
+//GetFundFromDb get fund price from mongo
+func GetFundFromDb(w http.ResponseWriter, r *http.Request, cache *bigcache.BigCache) {
+	params := mux.Vars(r) // Gets params
+	fundCode := strings.ToUpper(params["code"])
+	var fundProfile bson.M
+	var key string = "FUND_PROFILE_" + fundCode
+
+	cacheData, cacheErr := cache.Get(key)
+	if cacheErr == nil {
+		if err := helper.DecodeFromBase64(&fundProfile, string(cacheData)); err != nil {
+			panic(err)
+		}
+	}
+	// Get data from db
+	collection := nosql.MongoClient.Database("db0").Collection("price")
+	if err := collection.FindOne(context.TODO(), bson.M{"code": fundCode, "datetime": time.Now().Format("02-01-2006")}).Decode(&fundProfile); err != nil {
+		panic(err)
+	}
+
+	// Encode for caching
+	enc, err := helper.EncodeToBase64(fundProfile)
+	if err != nil {
+		panic(err)
+	}
+	setErr := cache.Set(key, []byte(enc))
+	if setErr != nil {
+		panic(setErr)
+	}
+
+	json.NewEncoder(w).Encode(fundProfile)
 }
